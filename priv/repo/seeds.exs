@@ -11,8 +11,14 @@
 # and so on) as they will fail if something goes wrong.
 
 alias Partygo.Users.User
+alias Partygo.Parties.Party
 alias Partygo.Repo
 
-%User{dob: ~D[2001-04-04], email: "tomasberto85@gmail.com", name: "bt", sex: :male, tag: "tombertoli", uid: "1234"} |> Repo.insert!
-%User{dob: ~D[2001-05-04], email: "antoniopacosantos@gmail.com", name: "pulguita", sex: :male, tag: "pulga", uid: "5678"} |> Repo.insert!
+berto = %User{dob: ~D[2001-04-04], email: "tomasberto85@gmail.com", name: "bt", sex: :male, tag: "tombertoli", uid: "1234"} |> Repo.insert!
+pulga = %User{dob: ~D[2001-05-04], email: "antoniopacosantos@gmail.com", name: "pulguita", sex: :male, tag: "pulga", uid: "5678"} |> Repo.insert!
+
+%Party{date: ~U[2023-05-04 21:00:00Z], description: "Cumple de pulga ololo", latitude: -34.561631, longitude: -58.480185, title: "Cumple de pulga", owner: pulga}
+        |> Ecto.Changeset.change()
+        |> Ecto.Changeset.put_assoc(:assisting, [berto])
+        |> Repo.insert!
 
