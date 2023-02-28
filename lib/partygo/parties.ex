@@ -7,6 +7,7 @@ defmodule Partygo.Parties do
   alias Partygo.Repo
 
   alias Partygo.Parties.Party
+  alias Partygo.Users.User
 
   @doc """
   Returns the list of parties.
@@ -18,7 +19,7 @@ defmodule Partygo.Parties do
 
   """
   def list_parties do
-    Repo.all(Party) |> Repo.preload([:owner, :assisting])
+    Repo.all(Party)
   end
 
   @doc """
@@ -50,6 +51,10 @@ defmodule Partygo.Parties do
 
   """
   def create_party(attrs \\ %{}) do
+    owner = Repo.get(User, attrs.owner_id)
+    attrs = Map.put(attrs, :owner, owner)
+    attrs = Map.put(attrs, :assisting, [])
+
     %Party{}
     |> Party.changeset(attrs)
     |> Repo.insert()

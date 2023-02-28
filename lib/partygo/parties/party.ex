@@ -21,8 +21,8 @@ defmodule Partygo.Parties.Party do
   def changeset(party, attrs) do
     party
     |> cast(attrs, [:title, :description, :date, :latitude, :longitude, :age_from, :age_to])
-    |> cast_assoc(:owner, required: true)
-    |> cast_assoc(:assisting, required: true)
-    |> validate_required([:title, :description, :date, :latitude, :longitude])
+    |> put_assoc(:owner, attrs.owner)
+    |> put_assoc(:assisting, attrs.assisting)
+    |> validate_required([:title, :description, :date, :latitude, :longitude, :owner])
   end
 end
