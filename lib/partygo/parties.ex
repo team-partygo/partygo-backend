@@ -52,8 +52,9 @@ defmodule Partygo.Parties do
   """
   def create_party(attrs \\ %{}) do
     owner = Repo.get(User, attrs.owner_id)
-    attrs = Map.put(attrs, :owner, owner)
-    attrs = Map.put(attrs, :assisting, [])
+    attrs = attrs
+            |> Map.put(:owner, owner)
+            |> Map.put(:assisting, [])
 
     %Party{}
     |> Party.changeset(attrs)
@@ -72,10 +73,13 @@ defmodule Partygo.Parties do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_party(%Party{} = party, attrs) do
+  def update_party(%Party{owner_id: owner_id} = party, owner_id, attrs) do
     party
     |> Party.changeset(attrs)
     |> Repo.update()
+  end
+  def update_party(%Party{} = _party, _owner_id, _attrs) do
+    {:error, "party not owned by the user modifying it"}
   end
 
   @doc """
@@ -90,8 +94,11 @@ defmodule Partygo.Parties do
       {:error, %Ecto.Changeset{}}
 
   """
-  def delete_party(%Party{} = party) do
-    Repo.delete(party)
+  def delete_party(owner_id, party_id) do
+    from(p in Party,
+      where: p.owner_id == ^owner_id,
+      where: p.id == ^party_id)
+      |> Repo.delete_all
   end
 
   @doc """

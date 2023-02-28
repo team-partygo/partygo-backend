@@ -1,13 +1,15 @@
 defmodule PartygoWeb.Schema do
   use Absinthe.Schema
-  import Absinthe.Resolution.Helpers, only: [dataloader: 1]
-  import_types Absinthe.Type.Custom
   alias PartygoWeb.UserResolver
   alias PartygoWeb.PartyResolver
+
+  import_types PartygoWeb.Schema.Party
+  import_types PartygoWeb.Schema.User
 
   def context(ctx) do
     loader = Dataloader.new
              |> Dataloader.add_source(User, Partygo.Dataloader.data())
+             |> Dataloader.add_source(Party, Partygo.Dataloader.data())
 
     Map.put(ctx, :loader, loader)
   end
@@ -16,50 +18,22 @@ defmodule PartygoWeb.Schema do
     [Absinthe.Middleware.Dataloader | Absinthe.Plugin.defaults()]
   end
 
-  enum :sex do
-    value :male
-    value :female
-  end
-
-  object :user do
-    field :id, non_null(:id)
-    field :uid, non_null(:string)
-    field :email, non_null(:string)
-    field :name, non_null(:string)
-    field :dob, non_null(:date)
-    field :tag, non_null(:string)
-    field :sex, :sex
-  end
-
-  object :party do
-    field :id, non_null(:id)
-    field :owner, non_null(:user), resolve: dataloader(User)
-    field :title, non_null(:string)
-    field :description, non_null(:string)
-    field :date, non_null(:datetime)
-    field :latitude, non_null(:decimal)
-    field :longitude, non_null(:decimal)
-    field :age_from, :integer
-    field :age_to, :integer
-    field :assisting, non_null(list_of(non_null(:user))), resolve: dataloader(User)
-  end
-
   query do
     @desc "Get all users"
     field :all_users, non_null(list_of(non_null(:user))) do
-      resolve(&UserResolver.all_users/3)
+      (&UserResolver.all_users/3) |> handle_errors |> resolve
     end
 
     @desc "Get all parties"
     field :all_parties, non_null(list_of(non_null(:party))) do
-      resolve(&PartyResolver.all_parties/3)
+      (&PartyResolver.all_parties/3) |> handle_errors |> resolve
     end
   end
 
   mutation do
     @desc "Create a new party"
     field :create_party, :party do
-      # esto probablemente tenga que venir en el JWT
+      # TODO: esto probablemente tenga que venir en el JWT
       arg :owner_id, non_null(:id)
 
       arg :title, non_null(:string)
@@ -70,7 +44,40 @@ defmodule PartygoWeb.Schema do
       arg :age_from, :integer
       arg :age_to, :integer
 
-      resolve(&PartyResolver.create_party/3)
+      (&PartyResolver.create_party/3) |> handle_errors |> resolve
     end
+
+    @desc "Delete a party"
+    field :delete_party, :boolean do
+      # TODO: pasar por JWT
+      arg :owner_id, non_null(:id)
+      arg :party_id, non_null(:id)
+
+      (&PartyResolver.delete_party/3) |> handle_errors |> resolve
+    end
+
+    @desc "Update a party"
+    field :update_party, :party do
+      # TODO: pasar por JWT
+      arg :owner_id, non_null(:id)
+      arg :party_id, non_null(:id)
+      arg :edit, non_null(:party_edit)
+
+      (&PartyResolver.update_party/3) |> handle_errors |> resolve
+    end
+  end
+
+  def handle_errors(f) do
+    fn source, args, info -> 
+      case Absinthe.Resolution.call(f, source, args, info) do
+        {:error, %Ecto.Changeset{} = changeset} -> format_changeset(changeset)
+        val -> val
+      end
+    end
+  end
+
+  def format_changeset(%Ecto.Changeset{} = changeset) do
+    errors = changeset.errors |> Enum.map(fn ({key, {value, context}}) -> [message: "#{key}: #{value}", details: context] end)
+    {:error, errors}
   end
 end
