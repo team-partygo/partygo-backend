@@ -17,7 +17,7 @@ defmodule Partygo.Users.User do
   def changeset(user, attrs) do
     user
     |> cast(attrs, [:uid, :tag, :name, :dob, :sex, :email])
-    |> validate_required([:uid, :tag, :name, :dob, :sex, :email])
+    |> validate_required([:uid, :tag, :name, :dob, :email])
     |> unique_constraint(:tag)
   end
 end
