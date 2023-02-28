@@ -24,5 +24,9 @@ defmodule Partygo.Parties.Party do
     |> put_assoc(:owner, attrs.owner)
     |> put_assoc(:assisting, attrs.assisting)
     |> validate_required([:title, :description, :date, :latitude, :longitude, :owner])
+    |> validate_change(:date, fn _, value ->
+      if DateTime.compare(value, DateTime.utc_now()) == :gt, do: [],
+      else: [title: "a party must happen in the future!"]
+    end)
   end
 end
