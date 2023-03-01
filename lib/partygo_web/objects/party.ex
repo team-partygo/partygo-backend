@@ -8,10 +8,11 @@ defmodule PartygoWeb.Schema.Party do
     field :title, non_null(:string)
     field :description, non_null(:string)
     field :date, non_null(:datetime)
-    field :latitude, non_null(:decimal)
-    field :longitude, non_null(:decimal)
+    field :latitude, non_null(:float)
+    field :longitude, non_null(:float)
     field :age_from, :integer
     field :age_to, :integer
+    field :assisting_limit, :integer
     field :assisting, non_null(list_of(non_null(:user))), resolve: dataloader(User)
   end
 

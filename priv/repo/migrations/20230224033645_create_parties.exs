@@ -7,13 +7,17 @@ defmodule Partygo.Repo.Migrations.CreateParties do
       add :age_to, :integer
       add :date, :utc_datetime
       add :description, :text
-      add :latitude, :decimal
-      add :longitude, :decimal
+      add :geohash, :string, size: 5
+      add :latitude, :float
+      add :longitude, :float
       add :title, :string
+      add :assisting_limit, :integer
+      add :assisting_count, :integer
       add :owner_id, references(:users)
 
       timestamps()
     end
+    create index("parties", [:id, :geohash])
 
     create table(:assisting_users, primary_key: false) do
       add :party_id, references(:parties, on_delete: :delete_all)
