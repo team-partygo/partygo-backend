@@ -113,4 +113,18 @@ defmodule Partygo.Parties do
   def change_party(%Party{} = party, attrs \\ %{}) do
     Party.changeset(party, attrs)
   end
+
+  @doc """
+  Returns parties near a specific location
+  """
+  def get_parties_near(lat, long) when is_float(lat) and is_float(long) do
+    geohash = Geohash.encode(lat, long, 5)
+    neighbors = geohash
+                |> Geohash.neighbors()
+                |> Enum.map(fn {_, v} -> v end)
+
+    Party
+    |> where([p], p.geohash in ^[geohash | neighbors])
+    |> Repo.all
+  end
 end

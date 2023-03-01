@@ -28,6 +28,14 @@ defmodule PartygoWeb.Schema do
     field :all_parties, non_null(list_of(non_null(:party))) do
       (&PartyResolver.all_parties/3) |> handle_errors |> resolve
     end
+
+    @desc "Get all parties near a certain point"
+    field :all_parties_near, non_null(list_of(non_null(:party))) do
+      arg :latitude, non_null(:float)
+      arg :longitude, non_null(:float)
+
+      (&PartyResolver.parties_near/3) |> handle_errors |> resolve
+    end
   end
 
   mutation do
@@ -39,8 +47,8 @@ defmodule PartygoWeb.Schema do
       arg :title, non_null(:string)
       arg :description, non_null(:string)
       arg :date, non_null(:datetime)
-      arg :latitude, non_null(:decimal)
-      arg :longitude, non_null(:decimal)
+      arg :latitude, non_null(:float)
+      arg :longitude, non_null(:float)
       arg :age_from, :integer
       arg :age_to, :integer
 

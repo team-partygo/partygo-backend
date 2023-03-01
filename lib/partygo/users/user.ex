@@ -21,7 +21,7 @@ defmodule Partygo.Users.User do
     user
     |> cast(attrs, [:uid, :tag, :name, :dob, :sex, :email])
     |> put_assoc(:parties, attrs.parties)
-    |> validate_required([:uid, :tag, :name, :dob, :email, :parties])
+    |> validate_required([:uid, :tag, :name, :dob, :email])
     |> unique_constraint(:tag)
   end
 end

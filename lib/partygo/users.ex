@@ -7,6 +7,7 @@ defmodule Partygo.Users do
   alias Partygo.Repo
 
   alias Partygo.Users.User
+  alias Partygo.Parties.Party
 
   @doc """
   Returns the list of users.
@@ -100,5 +101,21 @@ defmodule Partygo.Users do
   """
   def change_user(%User{} = user, attrs \\ %{}) do
     User.changeset(user, attrs)
+  end
+
+  @doc """
+  Assists a user to a party
+  """
+  def assist_to_party(user_id, party_id) do
+    update = from(p in Party, 
+      where: p.id == ^party_id, 
+      where: is_nil(p.assisting_limit) or p.assisting_count < p.assisting_limit, 
+      update: [inc: [assisting_count: 1]]
+    ) |> Repo.update_all([]) 
+    
+    case update do
+      {1, _} -> Repo.insert_all("assisting_users", [[user_id: user_id, party_id: party_id]])
+      _ -> {:error, "party at full capacity"}
+    end
   end
 end

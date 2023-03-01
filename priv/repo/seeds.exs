@@ -18,6 +18,11 @@ berto = User.changeset(%User{}, %{dob: ~D[2001-04-04], email: "tomasberto85@gmai
 pulga = User.changeset(%User{}, %{dob: ~D[2001-05-04], email: "antoniopacosantos@gmail.com", name: "pulguita", sex: :male, tag: "pulga", uid: "5678", parties: []}) |> Repo.insert!
 nn = User.changeset(%User{}, %{dob: ~D[2001-05-04], email: "antoniopacosantos@gmail.com", name: "pulguita", tag: "nn", uid: "5678", parties: []}) |> Repo.insert!
 
-Party.changeset(%Party{}, %{date: ~U[2023-05-04 21:00:00Z], description: "Cumple de pulga ololo", latitude: -34.561631, longitude: -58.480185, title: "Cumple de pulga", owner: pulga, assisting: [berto]})
-  |> Repo.insert!
+party = Party.changeset(%Party{}, %{date: ~U[2023-05-04 21:00:00Z], description: "Cumple de pulga ololo", latitude: -34.561631, longitude: -58.480185, title: "Cumple de pulga", owner: pulga, assisting: [berto], assisting_limit: 2})
+        |> Repo.insert!
+
+case Partygo.Users.assist_to_party(nn.id, party.id) do
+  {:error, e} -> throw e
+  _ -> {}
+end
 

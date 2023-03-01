@@ -18,6 +18,10 @@ defmodule PartygoWeb.PartyResolver do
 
   def update_party(_root, %{owner_id: owner_id, party_id: party_id, edit: party_edit} = _args, _info) do
     Parties.get_party!(party_id)
-      |> Parties.update_party(owner_id, party_edit)
+    |> Parties.update_party(owner_id, party_edit)
+  end
+
+  def parties_near(_root, %{latitude: lat, longitude: long} = _args, _info) do
+    {:ok, Parties.get_parties_near(lat, long)}
   end
 end
