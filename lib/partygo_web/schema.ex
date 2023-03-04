@@ -64,14 +64,23 @@ defmodule PartygoWeb.Schema do
       (&PartyResolver.delete_party/3) |> handle_errors |> resolve
     end
 
-    @desc "Update a party"
-    field :update_party, :party do
+    @desc "Edit a party"
+    field :edit_party, :party do
       # TODO: pasar por JWT
       arg :owner_id, non_null(:id)
       arg :party_id, non_null(:id)
       arg :edit, non_null(:party_edit)
 
       (&PartyResolver.update_party/3) |> handle_errors |> resolve
+    end
+
+    @desc "Assist the user to a party"
+    field :assist_to_party, :boolean do
+      # TODO: pasar por JWT
+      arg :user_id, non_null(:id)
+      arg :party_id, non_null(:id)
+
+      (&UserResolver.assist_to_party/3) |> handle_errors |> resolve
     end
   end
 
