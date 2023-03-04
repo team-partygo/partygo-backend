@@ -115,7 +115,7 @@ defmodule Partygo.Users do
     
     case update do
       {1, _} -> Repo.insert_all("assisting_users", [[user_id: user_id, party_id: party_id]])
-      _ -> {:error, "party at full capacity"}
+      _ -> {:error, :party_capacity}
     end
   end
 end
