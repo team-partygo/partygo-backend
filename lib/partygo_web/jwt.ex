@@ -12,6 +12,7 @@ end
 
 defmodule PartygoWeb.JWTPlug do
   import Plug.Conn
+  import Phoenix.Controller, only: [put_view: 2, render: 2]
   alias PartygoWeb.Token
 
   def init(opts), do: opts
@@ -36,7 +37,8 @@ defmodule PartygoWeb.JWTPlug do
   def unauthorized(conn) do
     conn
     |> put_status(:unauthorized)
-    |> Phoenix.Controller.render(PartygoWeb.ErrorView, "401.json")
+    |> put_view(PartygoWeb.ErrorView)
+    |> render("401.json")
     |> halt
   end
 end
