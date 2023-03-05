@@ -41,9 +41,6 @@ defmodule PartygoWeb.Schema do
   mutation do
     @desc "Create a new party"
     field :create_party, :party do
-      # TODO: esto probablemente tenga que venir en el JWT
-      arg :owner_id, non_null(:id)
-
       arg :title, non_null(:string)
       arg :description, non_null(:string)
       arg :date, non_null(:datetime)
@@ -57,8 +54,6 @@ defmodule PartygoWeb.Schema do
 
     @desc "Delete a party"
     field :delete_party, :boolean do
-      # TODO: pasar por JWT
-      arg :owner_id, non_null(:id)
       arg :party_id, non_null(:id)
 
       (&PartyResolver.delete_party/3) |> handle_errors |> resolve
@@ -66,8 +61,6 @@ defmodule PartygoWeb.Schema do
 
     @desc "Edit a party"
     field :edit_party, :party do
-      # TODO: pasar por JWT
-      arg :owner_id, non_null(:id)
       arg :party_id, non_null(:id)
       arg :edit, non_null(:party_edit)
 
@@ -76,8 +69,6 @@ defmodule PartygoWeb.Schema do
 
     @desc "Assist the user to a party"
     field :assist_to_party, :boolean do
-      # TODO: pasar por JWT
-      arg :user_id, non_null(:id)
       arg :party_id, non_null(:id)
 
       (&UserResolver.assist_to_party/3) |> handle_errors |> resolve

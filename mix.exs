@@ -36,18 +36,19 @@ defmodule Partygo.MixProject do
       {:absinthe, "~> 1.7.0"},
       {:absinthe_plug, "~> 1.5"},
       {:dataloader, "~> 1.0.0"},
+      {:ecto_sql, "~> 3.6"},
+      {:geohash, "~> 1.2.1"},
+      {:gettext, "~> 0.18"},
+      {:jason, "~> 1.2"},
+      {:joken, "~> 2.6.0"},
       {:phoenix, "~> 1.6.16"},
       {:phoenix_ecto, "~> 4.4"},
-      {:ecto_sql, "~> 3.6"},
-      {:postgrex, ">= 0.0.0"},
       {:phoenix_live_dashboard, "~> 0.6"},
+      {:plug_cowboy, "~> 2.5"},
+      {:postgrex, ">= 0.0.0"},
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.18"},
-      {:geohash, "~> 1.2.1"},
-      {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
     ]
   end
 
