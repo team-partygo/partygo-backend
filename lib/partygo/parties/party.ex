@@ -34,6 +34,12 @@ defmodule Partygo.Parties.Party do
     |> validate_required([:title, :description, :date, :latitude, :longitude, :owner, :assisting_count, :geohash])
   end
 
+  @doc false
+  def edit_changeset(party, attrs) do
+    party
+    |> cast(attrs, [:description, :date])
+  end
+
   def validate_assisting(changeset) do
     assisting_count = get_field(changeset, :assisting_count)
     changeset
