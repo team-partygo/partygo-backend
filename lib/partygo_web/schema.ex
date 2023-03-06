@@ -67,6 +67,16 @@ defmodule PartygoWeb.Schema do
       (&PartyResolver.update_party/3) |> handle_errors |> resolve
     end
 
+    @desc "Finish user creation" 
+    field :create_user, :user do
+      arg :dob, non_null(:date)
+      arg :name, non_null(:string)
+      arg :sex, :sex
+      arg :tag, non_null(:string)
+
+      (&UserResolver.create_user/3) |> handle_errors |> resolve
+    end
+
     @desc "Assist the user to a party"
     field :assist_to_party, :boolean do
       arg :party_id, non_null(:id)

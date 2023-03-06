@@ -12,4 +12,8 @@ defmodule PartygoWeb.UserResolver do
       e -> e
     end
   end
+
+  def create_user(_root, args, _info) do
+    Users.create_user(args)
+  end
 end

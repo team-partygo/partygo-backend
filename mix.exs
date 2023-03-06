@@ -39,6 +39,7 @@ defmodule Partygo.MixProject do
       {:ecto_sql, "~> 3.6"},
       {:geohash, "~> 1.2.1"},
       {:gettext, "~> 0.18"},
+      {:httpoison, "~> 2.0"},
       {:jason, "~> 1.2"},
       {:joken, "~> 2.6.0"},
       {:phoenix, "~> 1.6.16"},

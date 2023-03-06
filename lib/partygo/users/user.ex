@@ -4,11 +4,10 @@ defmodule Partygo.Users.User do
 
   schema "users" do
     field :dob, :date
-    field :email, :string
     field :name, :string
     field :sex, Ecto.Enum, values: [:male, :female]
     field :tag, :string
-    field :uid, :string, redact: true
+    has_one :uuid, Partygo.Users.UUID
     has_many :parties, Partygo.Parties.Party, foreign_key: :owner_id
     many_to_many :assisting_to, Partygo.Parties.Party, 
       join_through: "assisting_users"
@@ -19,9 +18,10 @@ defmodule Partygo.Users.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:uid, :tag, :name, :dob, :sex, :email])
+    |> cast(attrs, [:tag, :name, :dob, :sex])
+    |> put_assoc(:uuid, attrs.uuid)
     |> put_assoc(:parties, attrs.parties)
-    |> validate_required([:uid, :tag, :name, :dob, :email])
+    |> validate_required([:tag, :name, :dob])
     |> unique_constraint(:tag)
   end
 end

@@ -6,6 +6,17 @@ defmodule PartygoWeb.Router do
     plug PartygoWeb.JWTPlug
   end
 
+  pipeline :login do
+    plug :accepts, ["x-www-form-urlencoded"]
+    plug Plug.Parsers, parsers: [:urlencoded]
+    plug PartygoWeb.Plug.VerifyCSRF
+  end
+
+  scope "/login" do
+    pipe_through :login
+    post "/google", PartygoWeb.Plug.Login.Google, []
+  end
+
   scope "/api" do
     pipe_through :api
     forward "/", Absinthe.Plug, 
