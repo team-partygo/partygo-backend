@@ -18,23 +18,22 @@ defmodule PartygoWeb.JWTPlug do
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    case get_header(conn) |> parse_jwt() do
-      {:ok, claims} -> Absinthe.Plug.put_options(conn, context: %{user_id: claims["sub"]})
-      {:error, _} -> unauthorized(conn)
+    with {:ok, jwt} <- get_header(conn),
+         {:ok, claims} <- Token.verify_and_validate(jwt) do
+      Absinthe.Plug.put_options(conn, context: %{user_id: claims["sub"]})
+    else 
+      _ -> unauthorized(conn)
     end
   end
 
-  def parse_jwt({:ok, jwt}), do: Token.verify_and_validate(jwt)
-  def parse_jwt(e), do: e
-
-  def get_header(conn) do 
+  defp get_header(conn) do 
     case get_req_header(conn, "authorization") do
       ["Bearer " <> token] -> {:ok, token}
       _ -> {:error, :no_token}
     end
   end
 
-  def unauthorized(conn) do
+  defp unauthorized(conn) do
     conn
     |> put_status(:unauthorized)
     |> put_view(PartygoWeb.ErrorView)
