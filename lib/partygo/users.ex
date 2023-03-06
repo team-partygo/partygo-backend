@@ -70,7 +70,7 @@ defmodule Partygo.Users do
   """
   def update_user(%User{} = user, attrs) do
     user
-    |> User.changeset(attrs)
+    |> User.update_changeset(attrs)
     |> Repo.update()
   end
 
@@ -100,18 +100,26 @@ defmodule Partygo.Users do
 
   """
   def change_user(%User{} = user, attrs \\ %{}) do
-    User.changeset(user, attrs)
+    User.update_changeset(user, attrs)
   end
 
   @doc """
   Assists a user to a party
   """
   def assist_to_party(user_id, party_id) do
-    update = from(p in Party, 
-      where: p.id == ^party_id, 
-      where: is_nil(p.assisting_limit) or p.assisting_count < p.assisting_limit, 
+    update = from(p in Party, as: :party,
+      where: p.id == ^party_id,
+      # nos fijamos que no este asistiendo
+      where: not exists(
+        from(au in "assisting_users",
+          where: parent_as(:party).id == au.party_id and ^user_id == au.user_id,
+          select: ["user_id"]
+        )
+      ),
+      # nos fijamos que haya espacio
+      where: is_nil(p.assisting_limit) or p.assisting_count < p.assisting_limit,
       update: [inc: [assisting_count: 1]]
-    ) |> Repo.update_all([]) 
+    ) |> Repo.update_all([])
 
     with {1, nil} <- update,
          {1, nil} <- Repo.insert_all("assisting_users", [[user_id: user_id, party_id: party_id]]) do

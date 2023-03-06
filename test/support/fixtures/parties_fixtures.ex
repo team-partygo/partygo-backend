@@ -4,22 +4,25 @@ defmodule Partygo.PartiesFixtures do
   entities via the `Partygo.Parties` context.
   """
 
+  import Partygo.UsersFixtures
+
   @doc """
   Generate a party.
   """
   def party_fixture(attrs \\ %{}) do
-    {:ok, party} =
+    user = user_fixture()
+    attrs =
       attrs
       |> Enum.into(%{
         age_from: 42,
         age_to: 42,
-        date: ~U[2023-02-23 03:12:00Z],
+        date: ~U[3023-02-23 03:12:00Z],
         description: "some description",
         latitude: "120.5",
         longitude: "120.5",
-        name: "some name"
+        title: "some name",
       })
-      |> Partygo.Parties.create_party()
+    {:ok, party} = Partygo.Parties.create_party(user.id, attrs)
 
     party
   end

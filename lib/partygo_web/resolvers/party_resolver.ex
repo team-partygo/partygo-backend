@@ -11,8 +11,8 @@ defmodule PartygoWeb.PartyResolver do
 
   def delete_party(_root, %{party_id: party_id}, info) do
     case Parties.delete_party(info.context.user_id, party_id) do
-      {0, _} -> {:ok, false}
-      _ -> {:ok, true}
+      {:error, _} -> {:ok, false}
+      :ok -> {:ok, true}
     end
   end
 
