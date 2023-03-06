@@ -7,7 +7,6 @@ defmodule Partygo.Users do
   alias Partygo.Repo
 
   alias Partygo.Users.User
-  alias Partygo.Users.UUID
   alias Partygo.Parties.Party
 
   @doc """
@@ -113,19 +112,12 @@ defmodule Partygo.Users do
       where: is_nil(p.assisting_limit) or p.assisting_count < p.assisting_limit, 
       update: [inc: [assisting_count: 1]]
     ) |> Repo.update_all([]) 
-    
-    case update do
-      {1, _} -> Repo.insert_all("assisting_users", [[user_id: user_id, party_id: party_id]])
-      _ -> {:error, :party_capacity}
-    end
-  end
 
-  @doc """
-  Creates a UUID, later to be linked to a user
-  """
-  def create_uuid(attrs \\ %{}) do
-    %UUID{}
-    |> UUID.changeset(attrs)
-    |> Repo.insert()
+    with {1, nil} <- update,
+         {1, nil} <- Repo.insert_all("assisting_users", [[user_id: user_id, party_id: party_id]]) do
+      :ok
+    else
+      _ -> {:error, :party_capacity}
+    end 
   end
 end

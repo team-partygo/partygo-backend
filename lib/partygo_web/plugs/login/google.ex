@@ -9,37 +9,59 @@ defmodule PartygoWeb.Token.Google do
 end
 
 defmodule PartygoWeb.Plug.Login.Google do
+  import Ecto.Query
   import Plug.Conn
   import Phoenix.Controller, only: [put_view: 2, render: 2]
+  alias Partygo.Repo
   alias Partygo.Users
-  alias PartygoWeb.Token.Google, as: Token
+  alias Partygo.Users.User
+  alias PartygoWeb.Token.Google, as: GoogleToken
+  alias PartygoWeb.Token
 
   def init(opts), do: opts
 
   def call(conn, _opts) do
-    {:ok, keys} = get_keys()
+    with {:ok, token} <- get_jwt(conn),
+         {:ok, claims} <- get_claims(token),
+         {:ok, %User{id: uid}} <- get_user(conn, claims) do
 
-    with {:ok, token} <- get_jwt(conn) do
-      claims = Enum.find_value(keys, fn key -> 
-                 case Token.verify_and_validate(token, key) do
-                   {:ok, claims} -> claims
-                   _ -> nil
-                 end
-               end)
-
-      if is_nil(claims) or not claims["email_verified"] do
-        error(conn, 401)
-      else 
-        Users.create_uuid(%{
-          uuid_source: :google,
-          uuid: claims["sub"],
-          email: claims["email_verified"]
-        })
-        ok(conn)
-      end
+      {:ok, token, _claims} = Token.generate_and_sign(%{"sub" => uid})
+      ok(conn, token)
     else
       _ -> error(conn, 400)
     end
+  end
+
+  defp get_user(conn, claims) do
+    case User
+         |> where([u], u.uuid_source == :google and u.uuid == ^claims["sub"])
+         |> Repo.one() do
+      nil ->  conn.body_params
+              |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+              |> Map.merge(%{
+                uuid_source: :google,
+                uuid: claims["sub"],
+                email: claims["email"],
+                parties: [],
+              }) 
+              |> Users.create_user()
+      user -> {:ok, user}
+    end
+  end
+
+  defp get_claims(token) do
+    {:ok, keys} = get_keys()
+
+    claims = Enum.find_value(keys, fn key -> 
+               case GoogleToken.verify_and_validate(token, key) do
+                 {:ok, claims} -> claims
+                 _ -> nil
+               end
+             end)
+
+    if is_nil(claims) or is_nil(claims["email_verified"]), 
+      do: {:error, :invalid_token},
+      else: {:ok, claims}
   end
 
   defp get_keys() do
@@ -62,10 +84,9 @@ defmodule PartygoWeb.Plug.Login.Google do
     |> halt
   end
 
-  # TODO: redirect?
-  defp ok(conn) do
+  defp ok(conn, token) do
     conn
-    |> send_resp(:no_content, "")
+    |> send_resp(:ok, token)
     |> halt
   end
 end

@@ -3,13 +3,13 @@ defmodule PartygoWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
-    plug PartygoWeb.JWTPlug
+    plug PartygoWeb.Plug.JWT
   end
 
   pipeline :login do
-    plug :accepts, ["x-www-form-urlencoded"]
-    plug Plug.Parsers, parsers: [:urlencoded]
-    plug PartygoWeb.Plug.VerifyCSRF
+    plug :accepts, ["json"]
+    plug Plug.Parsers, parsers: [:json],
+      json_decoder: Jason
   end
 
   scope "/login" do

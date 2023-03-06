@@ -12,15 +12,10 @@ defmodule PartygoWeb.Schema.User do
     value :google
   end
 
-  object :uuid do
-    field :uuid_source, :uuid_source
-    field :uuid, :string
-    field :email, :string
-  end
-
   object :user do
     field :id, non_null(:id)
-    field :uuid, non_null(:uuid), resolve: dataloader(UUID)
+    field :uuid_source, :uuid_source
+    field :uuid, :string
     field :name, non_null(:string)
     field :dob, non_null(:date)
     field :tag, non_null(:string)
