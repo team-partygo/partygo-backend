@@ -95,10 +95,13 @@ defmodule Partygo.Parties do
 
   """
   def delete_party(owner_id, party_id) do
-    from(p in Party,
+    case from(p in Party,
       where: p.owner_id == ^owner_id,
       where: p.id == ^party_id)
-      |> Repo.delete_all
+      |> Repo.delete_all do
+      {1, _} -> :ok
+      {0, _} -> {:error, :invalid_permissions}
+    end
   end
 
   @doc """
@@ -111,7 +114,7 @@ defmodule Partygo.Parties do
 
   """
   def change_party(%Party{} = party, attrs \\ %{}) do
-    Party.changeset(party, attrs)
+    Party.edit_changeset(party, attrs)
   end
 
   @doc """

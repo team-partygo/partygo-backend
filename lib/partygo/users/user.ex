@@ -25,4 +25,11 @@ defmodule Partygo.Users.User do
     |> validate_required([:tag, :name, :dob, :email, :uuid_source, :uuid])
     |> unique_constraint(:tag)
   end
+
+  def update_changeset(user, attrs) do
+    user
+    |> cast(attrs, [:tag, :name, :sex, :email])
+    |> validate_required([:tag, :name, :sex, :email])
+    |> unique_constraint(:tag)
+  end
 end

@@ -36,15 +36,15 @@ defmodule PartygoWeb.Plug.Login.Google do
     case User
          |> where([u], u.uuid_source == :google and u.uuid == ^claims["sub"])
          |> Repo.one() do
-      nil ->  conn.body_params
-              |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
-              |> Map.merge(%{
-                uuid_source: :google,
-                uuid: claims["sub"],
-                email: claims["email"],
-                parties: [],
-              }) 
-              |> Users.create_user()
+      nil -> conn.body_params
+             |> Map.new(fn {k, v} -> {String.to_atom(k), v} end)
+             |> Map.merge(%{
+               uuid_source: :google,
+               uuid: claims["sub"],
+               email: claims["email"],
+               parties: [],
+             }) 
+             |> Users.create_user()
       user -> {:ok, user}
     end
   end
@@ -59,7 +59,7 @@ defmodule PartygoWeb.Plug.Login.Google do
                end
              end)
 
-    if is_nil(claims) or is_nil(claims["email_verified"]), 
+    if is_nil(claims) or not claims["email_verified"], 
       do: {:error, :invalid_token},
       else: {:ok, claims}
   end
