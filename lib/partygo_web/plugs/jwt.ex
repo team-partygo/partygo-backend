@@ -10,7 +10,7 @@ defmodule PartygoWeb.Token do
     ) |> add_claim("sub", nil, &is_number/1)
 end
 
-defmodule PartygoWeb.JWTPlug do
+defmodule PartygoWeb.Plug.JWT do
   import Plug.Conn
   import Phoenix.Controller, only: [put_view: 2, render: 2]
   alias PartygoWeb.Token

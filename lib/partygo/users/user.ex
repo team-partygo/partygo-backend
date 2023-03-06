@@ -3,11 +3,13 @@ defmodule Partygo.Users.User do
   import Ecto.Changeset
 
   schema "users" do
+    field :uuid_source, Ecto.Enum, values: [:google, :apple]
+    field :uuid, :string
     field :dob, :date
     field :name, :string
     field :sex, Ecto.Enum, values: [:male, :female]
     field :tag, :string
-    has_one :uuid, Partygo.Users.UUID
+    field :email, :string
     has_many :parties, Partygo.Parties.Party, foreign_key: :owner_id
     many_to_many :assisting_to, Partygo.Parties.Party, 
       join_through: "assisting_users"
@@ -18,10 +20,9 @@ defmodule Partygo.Users.User do
   @doc false
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:tag, :name, :dob, :sex])
-    |> put_assoc(:uuid, attrs.uuid)
+    |> cast(attrs, [:tag, :name, :dob, :sex, :email, :uuid_source, :uuid])
     |> put_assoc(:parties, attrs.parties)
-    |> validate_required([:tag, :name, :dob])
+    |> validate_required([:tag, :name, :dob, :email, :uuid_source, :uuid])
     |> unique_constraint(:tag)
   end
 end
