@@ -6,6 +6,21 @@ defmodule PartygoWeb.Schema do
   import_types PartygoWeb.Schema.Party
   import_types PartygoWeb.Schema.User
 
+  scalar :db_id do
+    parse fn input -> 
+      if is_integer(input.value) do
+        {:ok, input.value}
+      else 
+        case Integer.parse(input.value) do
+          {n, _} -> {:ok, n}
+          :error -> :error
+        end
+      end
+    end
+
+    serialize &Integer.to_string/1
+  end
+
   def context(ctx) do
     loader = Dataloader.new
              |> Dataloader.add_source(User, Partygo.Dataloader.data())
@@ -54,32 +69,22 @@ defmodule PartygoWeb.Schema do
 
     @desc "Delete a party"
     field :delete_party, :boolean do
-      arg :party_id, non_null(:id)
+      arg :party_id, non_null(:db_id)
 
       (&PartyResolver.delete_party/3) |> handle_errors |> resolve
     end
 
     @desc "Edit a party"
     field :edit_party, :party do
-      arg :party_id, non_null(:id)
+      arg :party_id, non_null(:db_id)
       arg :edit, non_null(:party_edit)
 
       (&PartyResolver.update_party/3) |> handle_errors |> resolve
     end
 
-    @desc "Finish user creation" 
-    field :create_user, :user do
-      arg :dob, non_null(:date)
-      arg :name, non_null(:string)
-      arg :sex, :sex
-      arg :tag, non_null(:string)
-
-      (&UserResolver.create_user/3) |> handle_errors |> resolve
-    end
-
     @desc "Assist the user to a party"
     field :assist_to_party, :boolean do
-      arg :party_id, non_null(:id)
+      arg :party_id, non_null(:db_id)
 
       (&UserResolver.assist_to_party/3) |> handle_errors |> resolve
     end

@@ -50,11 +50,8 @@ defmodule Partygo.Parties do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_party(owner_id, attrs \\ %{}) do
-    owner = Repo.get(User, owner_id)
-    attrs = attrs
-            |> Map.put(:owner, owner)
-            |> Map.put(:assisting, [])
+  def create_party(attrs \\ %{}) do
+    attrs = attrs |> Map.put(:assisting, [])
 
     %Party{}
     |> Party.changeset(attrs)
