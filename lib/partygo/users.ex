@@ -106,13 +106,15 @@ defmodule Partygo.Users do
   @doc """
   Assists a user to a party
   """
-  def assist_to_party(user_id, party_id) do
-    update = from(p in Party, as: :party,
+  def assist_to_party(user_id, party_id) when is_integer(user_id) and is_integer(party_id) do
+    update = from(p in Party,
       where: p.id == ^party_id,
+      # nos fijamos que no sea el duenio
+      where: p.owner_id != ^user_id,
       # nos fijamos que no este asistiendo
       where: not exists(
         from(au in "assisting_users",
-          where: parent_as(:party).id == au.party_id and ^user_id == au.user_id,
+          where: ^party_id == au.party_id and ^user_id == au.user_id,
           select: ["user_id"]
         )
       ),

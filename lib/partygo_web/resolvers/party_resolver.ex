@@ -1,4 +1,5 @@
 defmodule PartygoWeb.PartyResolver do
+  alias Partygo.Users
   alias Partygo.Parties
 
   def all_parties(_root, _args, _info) do
@@ -6,7 +7,9 @@ defmodule PartygoWeb.PartyResolver do
   end
 
   def create_party(_root, args, info) do
-    Parties.create_party(info.context.user_id, args)
+    args
+    |> Map.put(:owner, Users.get_user!(info.context.user_id))
+    |> Parties.create_party()
   end
 
   def delete_party(_root, %{party_id: party_id}, info) do
