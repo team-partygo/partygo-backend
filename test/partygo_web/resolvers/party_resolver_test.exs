@@ -121,4 +121,20 @@ defmodule Partygo.PartyResolverTest do
     refute updated.description == "edit"
     refute updated.date == ~U[3024-03-04 00:00:00Z]
   end
+
+  test "parties_near/3 just gets parties near the specified location" do
+    party = party_fixture()
+    party_fixture(%{latitude: party.latitude + 25, longitude: party.longitude + 25})
+
+    query = """
+    {
+      allPartiesNear(latitude: #{party.latitude + 0.003}, longitude: #{party.longitude - 0.003}) {
+        id
+      }
+    }
+    """
+
+    assert {:ok, %{data: %{"allPartiesNear" => [%{"id" => id}]}}} = Absinthe.run(query, PartygoWeb.Schema)
+    assert party.id == Integer.parse(id) |> elem(0)
+  end
 end

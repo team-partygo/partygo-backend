@@ -17,8 +17,6 @@ defmodule PartygoWeb.Schema do
         end
       end
     end
-
-    serialize &Integer.to_string/1
   end
 
   def context(ctx) do
