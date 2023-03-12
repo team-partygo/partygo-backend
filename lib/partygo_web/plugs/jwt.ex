@@ -1,4 +1,4 @@
-defmodule PartygoWeb.Token do
+defmodule PartygoWeb.Token.UserId do
   use Joken.Config
 
   @impl true
@@ -13,7 +13,7 @@ end
 defmodule PartygoWeb.Plug.JWT do
   import Plug.Conn
   import Phoenix.Controller, only: [put_view: 2, render: 2]
-  alias PartygoWeb.Token
+  alias PartygoWeb.Token.UserId, as: Token
 
   def init(opts), do: opts
 

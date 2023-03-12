@@ -16,16 +16,15 @@ defmodule PartygoWeb.Plug.Login.Google do
   alias Partygo.Users
   alias Partygo.Users.User
   alias PartygoWeb.Token.Google, as: GoogleToken
-  alias PartygoWeb.Token
+  alias PartygoWeb.Token.UserId, as: Token
 
   def init(opts), do: opts
 
   def call(conn, _opts) do
     with {:ok, token} <- get_jwt(conn),
          {:ok, claims} <- get_claims(token),
-         {:ok, %User{id: uid}} <- get_user(conn, claims) do
-
-      {:ok, token, _claims} = Token.generate_and_sign(%{"sub" => uid})
+         {:ok, %User{id: uid}} <- get_user(conn, claims),
+         {:ok, token, _claims} <- Token.generate_and_sign(%{"sub" => uid}) do
       ok(conn, token)
     else
       _ -> error(conn, 400)
