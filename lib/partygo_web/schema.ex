@@ -49,6 +49,13 @@ defmodule PartygoWeb.Schema do
 
       (&PartyResolver.parties_near/3) |> handle_errors |> resolve
     end
+
+    @desc "Get the user's ticket for a certain party"
+    field :ticket_for_party, :string do
+      arg :party_id, non_null(:db_id)
+
+      (&PartyResolver.generate_jwt_ticket/2) |> handle_errors |> resolve
+    end
   end
 
   mutation do
@@ -85,6 +92,13 @@ defmodule PartygoWeb.Schema do
       arg :party_id, non_null(:db_id)
 
       (&UserResolver.assist_to_party/3) |> handle_errors |> resolve
+    end
+
+    @desc "Validate a JWT ticket and assign the user as inside the party" 
+    field :validate_ticket, :boolean do
+      arg :ticket, non_null(:string)
+
+      (&PartyResolver.validate_jwt_ticket/2) |> handle_errors |> resolve
     end
   end
 

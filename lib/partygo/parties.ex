@@ -7,7 +7,7 @@ defmodule Partygo.Parties do
   alias Partygo.Repo
 
   alias Partygo.Parties.Party
-  alias Partygo.Users.User
+  alias Partygo.Token.Ticket
 
   @doc """
   Returns the list of parties.
@@ -126,5 +126,42 @@ defmodule Partygo.Parties do
     Party
     |> where([p], p.geohash in ^[geohash | neighbors])
     |> Repo.all
+  end
+
+  @doc """
+  Generates a JWT ticket for a user, party pair
+  """
+  def generate_jwt_ticket(user_id, party_id) when is_integer(user_id) and is_integer(party_id) do
+    assisting_to_party? = from(au in "assisting_users", 
+      where: au.party_id == ^party_id,
+      where: au.user_id == ^user_id,
+      select: au.user_id
+    ) |> Repo.one() |> then(&(not is_nil(&1)))
+
+    with true <- assisting_to_party?,
+         {:ok, ticket, _claims} <- Ticket.generate_and_sign(%{"sub" => user_id, "pid" => party_id}) do
+      {:ok, ticket}
+    else 
+      false -> {:error, "Not assisting to party!"}
+      e -> e
+    end
+  end
+
+  @doc """
+  Validates a JWT ticket for a user, party pair
+  """
+  def validate_jwt_ticket(user_id, jwt) when is_integer(user_id) do
+    with {:ok, %{"sub" => sub_user_id, "pid" => party_id}} <- Ticket.verify_and_validate(jwt),
+         %Party{} <- Party |> where([p], p.owner_id == ^user_id and p.id == ^party_id) |> Repo.one() do
+      {deleted, _} = from(au in "assisting_users",
+        where: au.party_id == ^party_id,
+        where: au.user_id == ^sub_user_id
+      ) |> Repo.delete_all()
+
+      {:ok, deleted >= 1}
+    else 
+      nil -> {:error, :unauthorized}
+      e -> e
+    end
   end
 end

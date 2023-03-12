@@ -27,4 +27,12 @@ defmodule PartygoWeb.PartyResolver do
   def parties_near(_root, %{latitude: lat, longitude: long}, _info) do
     {:ok, Parties.get_parties_near(lat, long)}
   end
+
+  def generate_jwt_ticket(%{party_id: party_id}, info) do
+    Parties.generate_jwt_ticket(info.context.user_id, party_id)
+  end
+
+  def validate_jwt_ticket(%{ticket: jwt}, info) do
+    Parties.validate_jwt_ticket(info.context.user_id, jwt)
+  end
 end
