@@ -1,0 +1,44 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+  - name: build
+    image: docker:dind
+    commands:
+      - echo "$JWT_PRIVATE_KEY" > config/prod/key.bin
+      - docker build -t partygo-backend .
+      - docker save partygo-backend > /drone/src/partygo-backend.tar
+    environment:
+      JWT_PRIVATE_KEY:
+        from_secret: jwt_private_key
+    volumes:
+      - name: dockersock
+        path: /var/run/docker.sock
+
+  - name: deploy
+    image: drillster/drone-rsync
+    settings:
+      hosts: void.ar
+      port: 22
+      user: ci
+      key:
+        from_secret: deploy_key
+      target: /usr/local/src/
+      source: /drone/src/partygo-backend.tar
+      delete: true
+      script:
+        - sudo docker load < /usr/local/src/partygo-backend.tar
+        - sudo systemctl restart partygo-backend
+
+volumes:
+  - name: dockersock
+    host:
+      path: /var/run/docker.sock
+
+trigger:
+  branch:
+    - main
+  event:
+    - push
+
