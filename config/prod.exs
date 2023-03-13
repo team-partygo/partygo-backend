@@ -14,11 +14,6 @@ config :partygo, PartygoWeb.Endpoint, cache_static_manifest: "priv/static/cache_
 # Do not print debug messages in production
 config :logger, level: :info
 
-config :joken, default_signer: [
-  signer_alg: "ES512",
-  key_map: File.read!("config/prod/key.bin") |> :erlang.binary_to_term
-]
-
 # ## SSL Support
 #
 # To get SSL working, you will need to add the `https` key

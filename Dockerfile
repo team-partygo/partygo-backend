@@ -77,10 +77,15 @@ WORKDIR "/app"
 RUN chown nobody /app
 
 # set runner ENV
+ENV SECRET_KEY_BASE=${SECRET_KEY_BASE}
 ENV MIX_ENV="prod"
 
 # Only copy the final release from the build stage
 COPY --from=builder --chown=nobody:root /app/_build/${MIX_ENV}/rel/partygo ./
+COPY config/prod/key.bin ./
+
+EXPOSE 4000
+EXPOSE 5432
 
 USER nobody
 
