@@ -12,7 +12,7 @@ defmodule PartygoWeb.Router do
       json_decoder: Jason
   end
 
-  scope "/login" do
+  scope "/api/login" do
     pipe_through :login
     post "/google", PartygoWeb.Plug.Login.Google, []
   end
