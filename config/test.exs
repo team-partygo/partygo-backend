@@ -28,3 +28,8 @@ config :logger, level: :warn
 
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :joken, default_signer: [
+  signer_alg: "ES512",
+  key_map: File.read!("config/dev/privkey.bin") |> :erlang.binary_to_term
+]
