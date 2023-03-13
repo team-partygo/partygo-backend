@@ -6,12 +6,16 @@ steps:
   - name: build
     image: docker:dind
     commands:
-      - echo "$JWT_PRIVATE_KEY" > config/prod/key.bin
-      - docker build -t partygo-backend .
+      - mkdir /drone/src/config/prod
+      - echo "$JWT_PRIVATE_KEY" > key.base64
+      - base64 -d key.base64 > /drone/src/config/prod/key.bin
+      - docker build -t partygo-backend --build-arg "SECRET_KEY_BASE=$SECRET_KEY_BASE" .
       - docker save partygo-backend > /drone/src/partygo-backend.tar
     environment:
       JWT_PRIVATE_KEY:
-        from_secret: jwt_private_key
+          from_secret: jwt_private_key
+      SECRET_KEY_BASE:
+          from_secret: phoenix_key
     volumes:
       - name: dockersock
         path: /var/run/docker.sock
