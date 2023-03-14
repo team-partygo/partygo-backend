@@ -97,6 +97,7 @@ defmodule PartygoWeb.Schema do
     @desc "Validate a JWT ticket and assign the user as inside the party" 
     field :validate_ticket, :boolean do
       arg :ticket, non_null(:string)
+      arg :party_id, non_null(:db_id)
 
       (&PartyResolver.validate_jwt_ticket/2) |> handle_errors |> resolve
     end
@@ -112,7 +113,7 @@ defmodule PartygoWeb.Schema do
   end
 
   def format_changeset(%Ecto.Changeset{} = changeset) do
-    errors = changeset.errors |> Enum.map(fn ({key, {value, context}}) -> [message: "#{key}: #{value}", details: context] end)
+    errors = changeset.errors |> Enum.map(fn ({key, {value, context}}) -> [message: "#{key}: #{value}", details: context |> Enum.map(fn {k, v} -> "#{k}: #{v}" end)] end)
     {:error, errors}
   end
 end

@@ -127,7 +127,8 @@ defmodule Partygo.Users do
          {1, nil} <- Repo.insert_all("assisting_users", [[user_id: user_id, party_id: party_id]]) do
       :ok
     else
-      _ -> {:error, :party_capacity}
+      {0, _} -> {:error, :party_capacity}
+      _ -> {:error, :unexpected}
     end 
   end
 end

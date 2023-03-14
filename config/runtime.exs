@@ -80,9 +80,9 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Hackney
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
-end
 
-config :joken, default_signer: [
-  signer_alg: "ES512",
-  key_map: File.read!("/app/key.bin") |> :erlang.binary_to_term
-]
+  config :joken, default_signer: [
+    signer_alg: "ES512",
+    key_map: File.read!("/app/key.bin") |> :erlang.binary_to_term
+  ]
+end

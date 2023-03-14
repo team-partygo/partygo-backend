@@ -51,8 +51,6 @@ defmodule Partygo.Parties do
 
   """
   def create_party(attrs \\ %{}) do
-    attrs = attrs |> Map.put(:assisting, [])
-
     %Party{}
     |> Party.changeset(attrs)
     |> Repo.insert()
@@ -76,7 +74,7 @@ defmodule Partygo.Parties do
     |> Repo.update()
   end
   def update_party(%Party{}, _owner_id, _attrs) do
-    {:error, "party not owned by the user modifying it"}
+    {:error, :unauthorized}
   end
 
   @doc """
@@ -97,7 +95,7 @@ defmodule Partygo.Parties do
       where: p.id == ^party_id)
       |> Repo.delete_all do
       {1, _} -> :ok
-      {0, _} -> {:error, :invalid_permissions}
+      {0, _} -> {:error, :unauthorized}
     end
   end
 
@@ -142,7 +140,7 @@ defmodule Partygo.Parties do
          {:ok, ticket, _claims} <- Ticket.generate_and_sign(%{"sub" => user_id, "pid" => party_id}) do
       {:ok, ticket}
     else 
-      false -> {:error, "Not assisting to party!"}
+      false -> {:error, :not_assisting}
       e -> e
     end
   end
@@ -150,8 +148,8 @@ defmodule Partygo.Parties do
   @doc """
   Validates a JWT ticket for a user, party pair
   """
-  def validate_jwt_ticket(user_id, jwt) when is_integer(user_id) do
-    with {:ok, %{"sub" => sub_user_id, "pid" => party_id}} <- Ticket.verify_and_validate(jwt),
+  def validate_jwt_ticket(user_id, party_id, jwt) when is_integer(user_id) and is_integer(party_id) do
+    with {:ok, %{"sub" => sub_user_id, "pid" => ^party_id}} <- Ticket.verify_and_validate(jwt),
          %Party{} <- Party |> where([p], p.owner_id == ^user_id and p.id == ^party_id) |> Repo.one() do
       {deleted, _} = from(au in "assisting_users",
         where: au.party_id == ^party_id,
@@ -161,6 +159,7 @@ defmodule Partygo.Parties do
       {:ok, deleted >= 1}
     else 
       nil -> {:error, :unauthorized}
+      {:ok, %{}} -> {:error, :invalid_ticket}
       e -> e
     end
   end

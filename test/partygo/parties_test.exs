@@ -69,7 +69,7 @@ defmodule Partygo.PartiesTest do
       party = party_fixture()
       user = user_fixture()
 
-      assert {:error, :invalid_permissions} = Parties.delete_party(user.id, party.id)
+      assert {:error, :unauthorized} = Parties.delete_party(user.id, party.id)
       assert %Party{} = Parties.get_party!(party.id)
     end
 

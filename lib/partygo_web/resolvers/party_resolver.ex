@@ -32,7 +32,10 @@ defmodule PartygoWeb.PartyResolver do
     Parties.generate_jwt_ticket(info.context.user_id, party_id)
   end
 
-  def validate_jwt_ticket(%{ticket: jwt}, info) do
-    Parties.validate_jwt_ticket(info.context.user_id, jwt)
+  def validate_jwt_ticket(%{ticket: jwt, party_id: party_id}, info) do
+    case Parties.validate_jwt_ticket(info.context.user_id, party_id, jwt) do
+      {:error, _reason} -> {:ok, false}
+      ok -> ok
+    end
   end
 end

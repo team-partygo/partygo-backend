@@ -168,7 +168,7 @@ defmodule Partygo.PartyResolverTest do
     assert {:ok, %{data: %{"ticketForParty" => nil}}} = Absinthe.run(query, PartygoWeb.Schema, context: %{user_id: user.id})
   end
 
-  test "validate_jwt_ticket/2 returns true if the user is assisting and the owner is scanning the ticket" do
+  test "validate_jwt_ticket/3 returns true if the user is assisting and the owner is scanning the ticket" do
     %Party{id: party_id, owner: %User{id: owner_id}} = party_fixture()
     user = user_fixture()
 
@@ -178,7 +178,7 @@ defmodule Partygo.PartyResolverTest do
 
     query = """
     mutation {
-      validateTicket(ticket: "#{ticket}")
+      validateTicket(ticket: "#{ticket}", partyId: #{party_id})
     }
     """
 
@@ -186,7 +186,7 @@ defmodule Partygo.PartyResolverTest do
     assert {:ok, %{data: %{"validateTicket" => false}}} = Absinthe.run(query, PartygoWeb.Schema, context: %{user_id: owner_id})
   end
 
-  test "validate_jwt_ticket/2 returns false if the user is not assisting and the owner is scanning the ticket" do
+  test "validate_jwt_ticket/3 returns false if the user is not assisting and the owner is scanning the ticket" do
     %Party{id: party_id, owner: %User{id: owner_id}} = party_fixture()
     user = user_fixture()
 
@@ -195,14 +195,14 @@ defmodule Partygo.PartyResolverTest do
 
     query = """
     mutation {
-      validateTicket(ticket: "#{ticket}")
+      validateTicket(ticket: "#{ticket}", partyId: #{party_id})
     }
     """
 
     assert {:ok, %{data: %{"validateTicket" => false}}} = Absinthe.run(query, PartygoWeb.Schema, context: %{user_id: owner_id})
   end
 
-  test "validate_jwt_ticket/2 returns false if the owner is not scanning the ticket" do
+  test "validate_jwt_ticket/3 returns false if the owner is not scanning the ticket" do
     %Party{id: party_id} = party_fixture()
     user = user_fixture()
 
@@ -212,10 +212,29 @@ defmodule Partygo.PartyResolverTest do
 
     query = """
     mutation {
-      validateTicket(ticket: "#{ticket}")
+      validateTicket(ticket: "#{ticket}", partyId: #{party_id})
     }
     """
 
-    assert {:ok, %{data: %{"validateTicket" => nil}}} = Absinthe.run(query, PartygoWeb.Schema, context: %{user_id: user.id})
+    assert {:ok, %{data: %{"validateTicket" => false}}} = Absinthe.run(query, PartygoWeb.Schema, context: %{user_id: user.id})
+  end
+
+  test "validate_jwt_ticket/3 returns false if the ticket is for another party" do
+    %Party{id: party_id} = party_fixture()
+    %Party{id: other_party_id} = party_fixture()
+    user = user_fixture()
+
+    :ok = Users.assist_to_party(user.id, party_id)
+    :ok = Users.assist_to_party(user.id, other_party_id)
+    {:ok, ticket} = Parties.generate_jwt_ticket(user.id, other_party_id)
+    refute is_nil(ticket)
+
+    query = """
+    mutation {
+      validateTicket(ticket: "#{ticket}", partyId: #{party_id})
+    }
+    """
+
+    assert {:ok, %{data: %{"validateTicket" => false}}} = Absinthe.run(query, PartygoWeb.Schema, context: %{user_id: user.id})
   end
 end

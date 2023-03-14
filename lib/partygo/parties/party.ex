@@ -29,7 +29,6 @@ defmodule Partygo.Parties.Party do
     |> put_assoc(:assisting, [])
     |> put_change(:assisting_count, 0)
     |> validate_number(:assisting_limit, greater_than: 0)
-    |> validate_assisting()
     |> hash_location()
     |> validate_required([:title, :description, :date, :latitude, :longitude, :owner, :assisting_count, :geohash])
   end
@@ -39,15 +38,6 @@ defmodule Partygo.Parties.Party do
     |> cast(attrs, [:description, :date])
     |> validate_date()
     |> validate_required([:description, :date])
-  end
-
-  def validate_assisting(changeset) do
-    assisting_count = get_field(changeset, :assisting_count)
-    changeset
-    |> validate_change(:assisting_limit, fn _, value ->
-      if is_nil(value) or value >= assisting_count, do: [],
-      else: [assisting_limit: "too many people assisting the party!"]
-    end)
   end
 
   def validate_date(changeset) do 
